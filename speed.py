@@ -128,3 +128,22 @@ class PowerSpeed(SpeedFunc):
     def __call__(self, clip_index):
         t = clip_index * self.delta_t
         return (t * self.scale_t) ** self.power
+
+
+class TanSpeed(SpeedFunc):
+    def __init__(self, scale_t: float = 55, delta_t=0.001):
+        super().__init__(delta_t)
+        self.scale_t = scale_t
+
+    def __call__(self, clip_index):
+        t = clip_index * self.delta_t
+        return math.tan(t / self.scale_t) + 1
+
+
+class ArcsinhSpeed(SpeedFunc):
+    def __init__(self, delta_t=0.01):
+        super().__init__(delta_t)
+
+    def __call__(self, clip_index):
+        t = clip_index * self.delta_t
+        return math.asinh(t)

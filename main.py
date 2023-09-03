@@ -18,7 +18,7 @@ def sample_frames(frame_index, speed, fps, delta_t=0.5) -> Tuple[np.ndarray, int
     scale = source_frame / sample_frame
     pre_idx = 0
     for i in range(sample_frame):
-        idx = min(max(int(i * scale), 0), source_frame - 1)
+        idx = min(max(int(i * scale), pre_idx), source_frame - 1)
         index_list[pre_idx: idx + 1] = frame_index + i * sign
         pre_idx = idx + 1
     index_list[pre_idx:] = frame_index + (sample_frame - 1) * sign
@@ -92,15 +92,18 @@ def process(show_speed=True):
     # speed_func = LogSpeed()
     # speed_func = SigmoidSpeed(offset_t=20)
     # speed_func = XSinSpeed(10, 0.05)
-    speed_func = PowerSpeed(2, 0.01)
+    # speed_func = PowerSpeed(2, 0.01)
+    # speed_func = TanSpeed()
+    speed_func = ArcsinhSpeed()
 
     video_frames, audio_frames, speeds = sample(video, audio, speed_func)
 
     def make_frames_audio(t):
         if isinstance(t, int):
             return audio.get_frame(audio_frames[min(t * audio.fps, len(audio_frames) - 1)] / audio.fps)
-        return audio.get_frame(
-            audio_frames[np.clip((t * audio.fps).astype(np.int32), 0, len(audio_frames) - 1)] / audio.fps)
+        frame_indices = np.clip((t * audio.fps).astype(np.int32), 0, len(audio_frames) - 1)
+        times = audio_frames[frame_indices] / audio.fps
+        return audio.get_frame(times)
 
     def make_frames_video(t):
         frame = video.get_frame(video_frames[min(int(t * video.fps), len(video_frames) - 1)] / video.fps).copy()
@@ -121,7 +124,7 @@ def process(show_speed=True):
         duration=len(video_frames) / video.fps
     )
     new_video = new_video.set_audio(new_audio)
-    new_video.write_videofile(os.path.join(root, '二次函数.mp4'), video.fps)
+    new_video.write_videofile(os.path.join(root, '反双曲正切函数.mp4'), video.fps)
 
 
 if __name__ == '__main__':
